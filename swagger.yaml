@@ -125,7 +125,7 @@ paths:
         - Bearer: []
       tags:
         - Transactions
-      description: Get all transactions if user is connected
+      description: Get all transactions of the current month
       produces:
         - application/json
       parameters:
@@ -134,13 +134,54 @@ paths:
           description: Attach Bearer JWT token.
           type: string
           required: true
+        - in: query
+          name: filter_date
+          description: allow date filter
+          type: string
+          format: date
+          required: true
       responses:
         200:
-          description: Successful Operation
+          description: Get Transactions Successfully
           schema:
-            $ref: '#/definitions/TransactionsResponse'
+            type: "array"
+            items: 
+              $ref: '#/definitions/Transaction'
         400:
-          description: Invalid Transaction Description Supplied
+          description: Invalid Fields Supplied
+        401:
+          description: Unauthorized Access To Get Transactions 
+        404:
+          description: Transactions Not Found
+        500:
+          description: Internal Server Error
+  /transactions/{transactionId}:
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - Transactions
+      description: Get a transaction by id
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: transactionId
+          description: ID to select a specific transaction
+          required: true
+          type: integer
+        - in: header
+          name: Authorization
+          description: Attach Bearer JWT token.
+          type: string
+          required: true
+      responses:
+        200:
+          description: Get Transaction Successfully
+          schema:
+            $ref: '#/definitions/Transaction'
+        400:
+          description: Invalid Fields Supplied
         401:
           description: Unauthorized Access
         404:
@@ -152,46 +193,15 @@ paths:
         - Bearer: []
       tags:
         - Transactions
-      description: Create a transaction's description
+      description: Add new transaction's informations
       consumes:
         - application/json
       produces:
         - application/json
       parameters:
-        - in: header
-          name: Authorization
-          description: Attach Bearer JWT token.
-          type: string
-          required: true
-        - in: body
-          name: body
-          description: Update user profile attributes
-          required: true
-          schema:
-            $ref: '#/definitions/TransactionDescription'
-      responses:
-        201:
-          description: Successful Operation
-        400:
-          description: Invalid Transaction Description Supplied
-        401:
-          description: Unauthorized Access
-        404:
-          description: Transaction Not Found
-        500:
-          description: Internal Server Error
-  /transactions/{transactionId}:
-    get:
-      security:
-        - Bearer: []
-      tags:
-        - Transactions
-      description: Get a transaction if user is connected
-      produces:
-        - application/json
-      parameters:
         - in: path
           name: transactionId
+          description: ID to select a specific transaction
           required: true
           type: integer
         - in: header
@@ -199,17 +209,21 @@ paths:
           description: Attach Bearer JWT token.
           type: string
           required: true
-      responses:
-        200:
-          description: Successful Operation
+        - in: body
+          name: body
+          description: Transaction Payload
+          required: true
           schema:
-            $ref: '#/definitions/TransactionResponse'
+            $ref: '#/definitions/Transaction'
+      responses:
+        201:
+          description: Transaction's informations Added Successfully
+          schema:
+            $ref: '#/definitions/Transaction'
         400:
-          description: Invalid Transaction Description Supplied
+          description: Invalid Transaction Payload Supplied
         401:
           description: Unauthorized Access
-        404:
-          description: Transaction Not Found
         500:
           description: Internal Server Error
     put:
@@ -217,7 +231,7 @@ paths:
         - Bearer: []
       tags:
         - Transactions
-      description: Update totally a transaction's description
+      description: Total update of transaction's informations
       consumes:
         - application/json
       produces:
@@ -225,6 +239,7 @@ paths:
       parameters:
         - in: path
           name: transactionId
+          description: ID to select a specific transaction
           required: true
           type: integer
         - in: header
@@ -234,15 +249,15 @@ paths:
           required: true
         - in: body
           name: body
-          description: Update totally user profile attributes
+          description: Total update of transaction's informations
           required: true
           schema:
-            $ref: '#/definitions/TransactionDescription'
+            $ref: '#/definitions/Transaction'
       responses:
         204:
-          description: Successful Operation
+          description: Successful Update Operation
         400:
-          description: Invalid Transaction Description Supplied
+          description: Invalid Fields Supplied
         401:
           description: Unauthorized Access
         404:
@@ -254,7 +269,7 @@ paths:
         - Bearer: []
       tags:
         - Transactions
-      description: Update partially a transaction's description
+      description: Partial update of transaction's informations
       consumes:
         - application/merge-patch+json
       produces:
@@ -262,6 +277,7 @@ paths:
       parameters:
         - in: path
           name: transactionId
+          description: ID to select a specific transaction
           required: true
           type: integer
         - in: header
@@ -271,15 +287,15 @@ paths:
           required: true
         - in: body
           name: body
-          description: Update partially user profile attributes
+          description: Partial update of transaction's informations
           required: true
           schema:
-            $ref: '#/definitions/TransactionDescription'
+            $ref: '#/definitions/Transaction'
       responses:
         204:
-          description: Successful Operation
+          description: Successful Partial Update Operation
         400:
-          description: Invalid Transaction Description Supplied
+          description: Invalid Transaction Fields Supplied
         401:
           description: Unauthorized Access
         404:
@@ -291,7 +307,7 @@ paths:
         - Bearer: []
       tags:
         - Transactions
-      description: Delete a transaction's description
+      description: Delete a transaction
       consumes:
         - application/json
       produces:
@@ -299,7 +315,7 @@ paths:
       parameters:
         - in: path
           name: transactionId
-          description: ID of the transaction to delete
+          description: ID to select a specific transaction
           type: integer
           required: true
         - in: header
@@ -308,10 +324,10 @@ paths:
           type: string
           required: true
       responses:
-        204:
-          description: Successful Operation
-        400:
-          description: Invalid Transaction Supplied
+        200:
+          description: Successful Deletion Operation
+          schema: 
+            $ref: '#/definitions/TransactionDeletedResponse'
         401:
           description: Unauthorized Access
         404:
@@ -372,28 +388,6 @@ definitions:
         type: string
       lastName:
         type: string
-  TransactionsResponse:
-    type: object
-    properties:
-      status:
-        type: integer
-      message:
-        type: string
-        example: Response status message
-      body:
-        type: array
-        items:
-          $ref: "#/definitions/Transaction"
-  TransactionResponse:
-    type: object
-    properties:
-      status:
-        type: integer
-      message:
-        type: string
-        example: Response status message
-      body:
-        $ref: "#/definitions/Transaction"
   Transaction:
     type: object
     properties:
@@ -421,12 +415,12 @@ definitions:
       note:
         type: string
         description: user's notes for transaction
-  TransactionDescription:
-    type: object
-    properties:
-      category:
-        type: string
-        description: transaction's category
-      note:
-        type: string
-        description: user's notes for transaction
+  TransactionDeletedResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Transaction deleted  
