@@ -125,7 +125,7 @@ paths:
         - Bearer: []
       tags:
         - Transactions
-      description: Get all transactions of the current month
+      description: Get transactions of a specific month
       produces:
         - application/json
       parameters:
@@ -135,18 +135,16 @@ paths:
           type: string
           required: true
         - in: query
-          name: filter_date
-          description: allow date filter
+          name: month
           type: string
-          format: date
+          format: MM:YYYY
+          description: The month of transactions to get
           required: true
       responses:
         200:
           description: Get Transactions Successfully
           schema:
-            type: "array"
-            items: 
-              $ref: '#/definitions/Transaction'
+            $ref: '#/definitions/ApiResponseTransactions'
         400:
           description: Invalid Fields Supplied
         401:
@@ -273,7 +271,7 @@ paths:
       consumes:
         - application/merge-patch+json
       produces:
-        - application/merge-patch+json
+        - application/json
       parameters:
         - in: path
           name: transactionId
@@ -286,11 +284,11 @@ paths:
           type: string
           required: true
         - in: body
-          name: body
+          name: request body
           description: Partial update of transaction's informations
           required: true
           schema:
-            $ref: '#/definitions/Transaction'
+            $ref: '#/definitions/partialTransaction'
       responses:
         204:
           description: Successful Partial Update Operation
@@ -394,9 +392,14 @@ definitions:
       id:
         type: string
         description: transaction ID
-      created:
+      createdAt:
         type: string
+        format: MM:YYYY
         description: transaction date
+      updatedAt:
+        type: string
+        format: MM:YYYY
+        description: transaction change date
       description:
         type: string
         description: transaction description
@@ -415,6 +418,54 @@ definitions:
       note:
         type: string
         description: user's notes for transaction
+  partialTransaction:
+    type: object
+    properties:
+      category:
+        type: string
+        description: transaction category
+      note:
+        type: string
+        description: user's notes for transaction
+  ApiResponseTransactions:
+    type: object
+    properties:
+      status:
+        type: integer
+        example: 200
+      message:
+        type: string
+        example: Message success
+      body:
+        type: array
+        items:
+          type: object
+          allOf:
+          - $ref: '#/definitions/Transaction'
+        example: [
+          {
+            "id": "60745437aba548853b8fc099d",
+            "createdAt": "2023-05-12T20:00:00",
+            "updatedAt": "2023-05-14T20:20:40",
+            "description": "description of transaction",
+            "amount": 110.45,
+            "balance": 3420.34,
+            "transactionType": "Electronic",
+            "category": "string",
+            "note": "note about current transaction",
+          },
+          {
+            "id": "60745437aba548853b8fc099d",
+            "createdAt": "2023-05-12T20:00:00",
+            "updatedAt": "2023-05-14T20:20:40",
+            "description": "description of transaction",
+            "amount": 110.45,
+            "balance": 3420.34,
+            "transactionType": "Electronic",
+            "category": "string",
+            "note": "note about current transaction",
+          }
+        ]
   TransactionDeletedResponse:
       type: object
       properties:
